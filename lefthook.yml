@@ -1,0 +1,42 @@
+# Lefthook configuration
+# https://lefthook.dev/configuration/
+
+pre-commit:
+  parallel: true
+  skip:
+    - merge
+    - rebase
+  commands:
+    eslint-api:
+      root: 'apps/api/'
+      glob: '**/*.{js,ts}'
+      exclude: 'worker-configuration.d.ts'
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+      priority: 1
+
+    eslint-math:
+      root: 'packages/math/'
+      glob: '**/*.{js,ts}'
+      run: pnpm exec eslint --fix {staged_files}
+      stage_fixed: true
+      priority: 1
+
+    wrangler-types:
+      glob: 'apps/api/wrangler.jsonc'
+      run: pnpm --filter api cf-typegen && git add apps/api/worker-configuration.d.ts
+      priority: 1
+
+    prettier:
+      glob: '*.{js,ts,json,jsonc,md,yml,yaml}'
+      exclude: 'apps/api/worker-configuration.d.ts'
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+      priority: 2
+
+    textlint:
+      glob: '*.md'
+      exclude: '.claude/**'
+      run: pnpm exec textlint --fix {staged_files}
+      stage_fixed: true
+      priority: 2
