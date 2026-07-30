@@ -1,0 +1,66 @@
+name: Dependabot auto-merge
+
+# Dependabot がマージに必要な書き込み権限を得るため pull_request_target を使用。
+# リスク軽減策: dependabot[bot] のみに制限、チェックアウトを PR HEAD SHA に固定、
+# 権限をジョブ単位で最小化。
+on: pull_request_target # zizmor: ignore[dangerous-triggers]
+
+jobs:
+  check:
+    name: Check update type
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    outputs:
+      update-type: ${{ steps.metadata.outputs.update-type }}
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  ci-and-merge:
+    name: CI and auto-merge
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    if: |
+      needs.check.outputs.update-type == 'version-update:semver-patch' ||
+      needs.check.outputs.update-type == 'version-update:semver-minor'
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Rebase and merge PR
+        run: gh pr merge --rebase "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

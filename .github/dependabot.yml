@@ -1,0 +1,72 @@
+version: 2
+updates:
+  # npm dependencies (pnpm uses npm ecosystem)
+  - package-ecosystem: 'npm'
+    directory: '/'
+    target-branch: 'develop'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Tokyo'
+    open-pull-requests-limit: 10
+    groups:
+      # Group Hono packages together
+      hono:
+        patterns:
+          - 'hono'
+          - '@hono/*'
+      # Group Cloudflare tooling together
+      cloudflare:
+        patterns:
+          - 'wrangler'
+          - '@cloudflare/*'
+          - 'miniflare'
+          - 'workerd'
+      # Group dev tools together
+      dev-tools:
+        patterns:
+          - 'eslint*'
+          - 'typescript-eslint'
+          - '@typescript-eslint/*'
+          - 'prettier*'
+          - 'typescript'
+          - 'lefthook'
+      # Group testing packages together
+      testing:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+      # Group textlint packages together
+      textlint:
+        patterns:
+          - 'textlint'
+          - 'textlint-*'
+    ignore:
+      # Node.js の型定義は開発時点の LTS バージョンに固定
+      - dependency-name: '@types/node'
+      # ESLint v10 は @typescript-eslint/utils との非互換性があるため v9 に固定
+      - dependency-name: 'eslint'
+        versions: ['>=10']
+    labels:
+      - 'dependencies'
+      - 'automated'
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+
+  # GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    target-branch: 'develop'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Tokyo'
+    labels:
+      - 'dependencies'
+      - 'github-actions'
+      - 'automated'
+    commit-message:
+      prefix: 'ci'
