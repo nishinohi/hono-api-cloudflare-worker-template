@@ -1,0 +1,34 @@
+{
+  "name": "cloudflare-hono-api-template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter api dev",
+    "build": "pnpm --filter api build",
+    "deploy": "pnpm --filter api deploy",
+    "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "lint:md": "textlint \"**/*.md\"",
+    "lint:md:fix": "textlint --fix \"**/*.md\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "cf-typegen": "pnpm --filter api cf-typegen"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.4",
+    "lefthook": "^2.1.3",
+    "prettier": "^3.8.3",
+    "textlint": "^15.5.2",
+    "textlint-rule-preset-ja-spacing": "^2.4.3",
+    "textlint-rule-preset-ja-technical-writing": "^12.0.2",
+    "textlint-rule-preset-jtf-style": "^3.0.3",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "packageManager": "pnpm@11.15.0+sha512.266f8957a30d2be6e9468e5e66bcdedd35a794175f71b067ba8504d686cce1d0c0f429b33c323c3c569ad4891e667574a49ff71d1b89a22cc66f13c65818c578"
+}
