@@ -13,16 +13,16 @@ Cloudflare Workers 上で動作する Hono 製 API のテンプレートです�
 
 ## 技術スタック
 
-| 領域           | 採用技術                                  |
-| -------------- | ----------------------------------------- |
-| ランタイム     | Cloudflare Workers                        |
-| フレームワーク | Hono 4                                    |
-| 開発・デプロイ | Wrangler 4                                |
-| 言語           | TypeScript                                |
-| テスト         | Vitest                                    |
-| Lint / Format  | ESLint（Flat Config）、Prettier、textlint |
-| Git フック     | Lefthook                                  |
-| パッケージ管理 | pnpm workspace                            |
+| 領域           | 採用技術                   |
+| -------------- | -------------------------- |
+| ランタイム     | Cloudflare Workers         |
+| フレームワーク | Hono 4                     |
+| 開発・デプロイ | Wrangler 4                 |
+| 言語           | TypeScript                 |
+| テスト         | Vitest                     |
+| Lint / Format  | Oxlint、Prettier、textlint |
+| Git フック     | Lefthook                   |
+| パッケージ管理 | pnpm workspace             |
 
 ## 必要要件
 
@@ -83,7 +83,7 @@ curl http://localhost:8787/api/tasks
 │           ├── middleware/            共通ミドルウェア
 │           └── routes/                ルーティングとハンドラー
 └── packages/
-    ├── eslint-config/                 共有 ESLint 設定
+    ├── oxlint-config/                 共有 Oxlint 設定
     └── math/                          ワークスペース参照のサンプル
 ```
 
@@ -99,7 +99,7 @@ curl http://localhost:8787/api/tasks
 | `pnpm test`          | 全パッケージのテストを実行する                      |
 | `pnpm test:coverage` | カバレッジ付きでテストを実行する                    |
 | `pnpm typecheck`     | 全パッケージの型チェックを行う                      |
-| `pnpm lint`          | 全パッケージの ESLint を実行する                    |
+| `pnpm lint`          | リポジトリ全体を Oxlint で検査する                  |
 | `pnpm lint:md`       | Markdown を textlint で検査する                     |
 | `pnpm format`        | Prettier で整形する                                 |
 | `pnpm check`         | typecheck、lint、test をまとめて実行する            |
@@ -148,7 +148,7 @@ curl http://localhost:8787/api/tasks
 
 ### ログ出力
 
-`src/lib/logger.ts` の `log()` を経由して、1 行の JSON として出力します。Cloudflare の observability で検索しやすくするためです。`console.log` は ESLint で禁止しています。
+`src/lib/logger.ts` の `log()` を経由して、1 行の JSON として出力します。Cloudflare の observability で検索しやすくするためです。`console.log` は Oxlint で禁止しています。
 
 ## 環境変数とシークレット
 
@@ -203,9 +203,18 @@ D1 や KV、Durable Objects を導入したら、実際の workerd 上で動か�
 
 ## Lint とフォーマット
 
-ESLint の共有設定は `packages/eslint-config` にあります。各パッケージの `eslint.config.js` から `baseConfig` を読み込みます。整形は Prettier、Markdown の日本語校正は textlint が担当します。
+Oxlint の共有設定は `packages/oxlint-config/base.json` にあります。各パッケージの `.oxlintrc.json` から `extends` で読み込み、そこにパッケージ固有の設定を追加します。整形は Prettier、Markdown の日本語校正は textlint が担当します。
 
-Lefthook がコミット前に ESLint、Prettier、textlint、`wrangler types` を自動実行します。初回のみ次のコマンドでフックを登録してください。
+```
+packages/oxlint-config/base.json    共通ルール
+├── .oxlintrc.json                  リポジトリ直下のファイル向け
+├── apps/api/.oxlintrc.json         + wrangler types の生成物を除外
+└── packages/math/.oxlintrc.json    追加設定なし
+```
+
+oxlint はファイルごとに最も近い `.oxlintrc.json`（nested config）を探して適用します。設定同士はマージされないため、各パッケージの設定は必ず `extends` でベースを読み込んでください。また `-c` / `--config` を渡すとこの探索が無効になるため、`lint` スクリプトでは指定していません。
+
+Lefthook がコミット前に Oxlint、Prettier、textlint、`wrangler types` を自動実行します。初回のみ次のコマンドでフックを登録してください。
 
 ```bash
 pnpm exec lefthook install
