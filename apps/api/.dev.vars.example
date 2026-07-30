@@ -1,0 +1,9 @@
+# ローカル開発用のシークレット。
+# このファイルをコピーして .dev.vars を作成する（.dev.vars は Git 管理外）。
+#
+#   cp .dev.vars.example .dev.vars
+#
+# 本番環境へは wrangler secret put <NAME> で登録する。
+# 秘匿する必要のない設定値は wrangler.jsonc の vars に書く。
+
+# API_KEY="local-development-key"

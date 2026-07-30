@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts", "worker-configuration.d.ts", "vitest.config.ts"],
+  "compilerOptions": {
+    "types": ["./worker-configuration.d.ts"]
+  }
+}
