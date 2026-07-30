@@ -23,7 +23,7 @@ You are an expert refactoring specialist focused on code cleanup and consolidati
 - **knip** - Find unused files, exports, dependencies, types
 - **depcheck** - Identify unused npm dependencies
 - **ts-prune** - Find unused TypeScript exports
-- **eslint** - Check for unused disable-directives and variables
+- **oxlint** - Check for unused disable-directives and variables
 
 ### Analysis Commands
 ```bash
@@ -37,7 +37,7 @@ npx depcheck
 npx ts-prune
 
 # Check for unused disable-directives
-npx eslint . --report-unused-disable-directives
+npx oxlint --report-unused-disable-directives
 ```
 
 ## Refactoring Workflow

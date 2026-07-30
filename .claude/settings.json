@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // empty' | grep -E '\\.(ts|tsx|js|jsx)$' | grep 'apps/api/' | xargs -I {} sh -c 'f={}; case $f in /*) ;; *) f=$(pwd)/$f ;; esac; pnpm --filter api exec eslint --fix $f 2>/dev/null || true'"
+            "command": "jq -r '.tool_input.file_path // empty' | grep -E '\\.(ts|tsx|js|jsx)$' | xargs -I {} pnpm exec oxlint --fix {} 2>/dev/null || true"
           },
           {
             "type": "command",

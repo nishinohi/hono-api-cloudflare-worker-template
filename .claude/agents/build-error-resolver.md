@@ -23,7 +23,7 @@ You are an expert build error resolution specialist focused on fixing TypeScript
 ### Build & Type Checking Tools
 - **tsc** - TypeScript compiler for type checking
 - **npm/yarn** - Package management
-- **eslint** - Linting (can cause build failures)
+- **oxlint** - Linting (can cause build failures)
 - **next build** - Next.js production build
 
 ### Diagnostic Commands
@@ -40,8 +40,8 @@ npx tsc --noEmit --pretty --incremental false
 # Check specific file
 npx tsc --noEmit path/to/file.ts
 
-# ESLint check
-npx eslint . --ext .ts,.tsx,.js,.jsx
+# Oxlint check
+npx oxlint
 
 # Next.js build (production)
 npm run build
@@ -391,7 +391,7 @@ function processData(data: Array<{ value: number }>) {
 # Build Error Resolution Report
 
 **Date:** YYYY-MM-DD
-**Build Target:** Next.js Production / TypeScript Check / ESLint
+**Build Target:** Next.js Production / TypeScript Check / Oxlint
 **Initial Errors:** X
 **Errors Fixed:** Y
 **Build Status:** ✅ PASSING / ❌ FAILING
@@ -430,7 +430,7 @@ Parameter 'market' implicitly has an 'any' type.
 
 1. ✅ TypeScript check passes: `npx tsc --noEmit`
 2. ✅ Next.js build succeeds: `npm run build`
-3. ✅ ESLint check passes: `npx eslint .`
+3. ✅ Oxlint check passes: `npx oxlint`
 4. ✅ No new errors introduced
 5. ✅ Development server runs: `npm run dev`
 
@@ -505,8 +505,8 @@ npx tsc --noEmit src/path/to/file.ts
 # Install missing dependencies
 npm install
 
-# Fix ESLint issues automatically
-npx eslint . --fix
+# Fix lint issues automatically
+npx oxlint --fix
 
 # Update TypeScript
 npm install --save-dev typescript@latest

@@ -26,9 +26,7 @@ updates:
       # Group dev tools together
       dev-tools:
         patterns:
-          - 'eslint*'
-          - 'typescript-eslint'
-          - '@typescript-eslint/*'
+          - 'oxlint'
           - 'prettier*'
           - 'typescript'
           - 'lefthook'
@@ -45,9 +43,6 @@ updates:
     ignore:
       # Node.js の型定義は開発時点の LTS バージョンに固定
       - dependency-name: '@types/node'
-      # ESLint v10 は @typescript-eslint/utils との非互換性があるため v9 に固定
-      - dependency-name: 'eslint'
-        versions: ['>=10']
     labels:
       - 'dependencies'
       - 'automated'

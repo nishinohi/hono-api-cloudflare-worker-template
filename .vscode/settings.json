@@ -1,9 +1,8 @@
 {
-  "eslint.validate": ["javascript", "typescript"],
-  "eslint.useFlatConfig": true,
-  "eslint.workingDirectories": [{ "mode": "auto" }],
+  // oxc.configPath は設定しない。設定すると CLI の -c と同様に
+  // nested config（パッケージごとの .oxlintrc.json）の探索が無効になる
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
+    "source.fixAll.oxc": "explicit",
     "source.fixAll.markdownlint": "explicit",
     "source.fixAll.textlint": "explicit"
   },
@@ -18,5 +17,5 @@
     "**/apps/api/worker-configuration.d.ts": true
   },
   "textlint.autoFixOnSave": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

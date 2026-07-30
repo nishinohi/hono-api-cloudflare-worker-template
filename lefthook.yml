@@ -7,18 +7,10 @@ pre-commit:
     - merge
     - rebase
   commands:
-    eslint-api:
-      root: 'apps/api/'
-      glob: '**/*.{js,ts}'
-      exclude: 'worker-configuration.d.ts'
-      run: pnpm exec eslint --fix {staged_files}
-      stage_fixed: true
-      priority: 1
-
-    eslint-math:
-      root: 'packages/math/'
-      glob: '**/*.{js,ts}'
-      run: pnpm exec eslint --fix {staged_files}
+    oxlint:
+      glob: '*.{js,ts}'
+      exclude: 'apps/api/worker-configuration.d.ts'
+      run: pnpm exec oxlint --fix {staged_files}
       stage_fixed: true
       priority: 1
 
