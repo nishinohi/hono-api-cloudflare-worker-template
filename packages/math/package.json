@@ -9,10 +9,11 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint"
+    "lint": "oxlint"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
+    "@repo/oxlint-config": "workspace:*",
+    "oxlint": "^1.76.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   }

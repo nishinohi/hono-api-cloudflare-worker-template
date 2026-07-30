@@ -1,0 +1,6 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../packages/oxlint-config/base.json"],
+  // wrangler types の生成物は対象外
+  "ignorePatterns": ["worker-configuration.d.ts"]
+}

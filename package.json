@@ -9,7 +9,8 @@
     "test": "pnpm -r test",
     "test:coverage": "pnpm -r test:coverage",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "lint:md": "textlint \"**/*.md\"",
     "lint:md:fix": "textlint --fix \"**/*.md\"",
     "format": "prettier --write .",
@@ -18,8 +19,8 @@
     "cf-typegen": "pnpm --filter api cf-typegen"
   },
   "devDependencies": {
-    "eslint": "^9.39.4",
     "lefthook": "^2.1.3",
+    "oxlint": "^1.76.0",
     "prettier": "^3.8.3",
     "textlint": "^15.5.2",
     "textlint-rule-preset-ja-spacing": "^2.4.3",

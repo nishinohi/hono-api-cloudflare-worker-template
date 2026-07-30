@@ -10,8 +10,8 @@
     "deploy:staging": "wrangler deploy --env staging",
     "deploy:develop": "wrangler deploy --env develop",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -23,8 +23,9 @@
     "hono": "^4.10.3"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
+    "@repo/oxlint-config": "workspace:*",
     "@vitest/coverage-v8": "^4.1.6",
+    "oxlint": "^1.76.0",
     "vitest": "^4.1.6",
     "wrangler": "^4.115.0"
   }

@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // 各パッケージは自身の .oxlintrc.json（nested config）が優先される。
+  // これはリポジトリ直下のファイル向けのフォールバック
+  "extends": ["./packages/oxlint-config/base.json"]
+}

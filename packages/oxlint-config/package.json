@@ -1,0 +1,7 @@
+{
+  "name": "@repo/oxlint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "全パッケージ共通の Oxlint 基本設定。各パッケージの .oxlintrc.json から extends で読み込む"
+}
