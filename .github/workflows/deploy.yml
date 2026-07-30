@@ -1,0 +1,97 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches:
+      # 誤デプロイを防ぐため、既定では発火しないダミーのブランチ名を指定している。
+      # テンプレートを利用するときは次のダミー行を削除し、必要なブランチのコメントを外す。
+      - remove-this-line-and-uncomment
+      # - main
+      # - staging
+      # - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    permissions:
+      contents: read
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || (github.ref == 'refs/heads/staging' && 'staging' || 'develop') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+
+      - name: Setup Node.js
+        # zizmor: ignore[cache-poisoning] -- pnpm install --frozen-lockfile provides lockfile integrity verification
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          CLOUDFLARE_ENV: ${{ github.ref == 'refs/heads/staging' && 'staging' || (github.ref == 'refs/heads/develop' && 'develop' || '') }}
+
+      - name: Deploy to Cloudflare Workers (Production)
+        if: github.ref == 'refs/heads/main'
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          # --env="" は wrangler.jsonc のトップレベル環境（production）を指す
+          command: deploy --env=""
+
+      - name: Deploy to Cloudflare Workers (Staging)
+        if: github.ref == 'refs/heads/staging'
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: deploy --env staging
+        env:
+          CLOUDFLARE_ENV: staging
+
+      - name: Deploy to Cloudflare Workers (Develop)
+        if: github.ref == 'refs/heads/develop'
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_WORKERS_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: deploy --env develop
+        env:
+          CLOUDFLARE_ENV: develop
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: ${{ job.status }}
+          title: Deploy to ${{ github.ref == 'refs/heads/main' && 'production' || (github.ref == 'refs/heads/staging' && 'staging' || 'develop') }}
+          description: |
+            Branch: `${{ github.ref_name }}`
+            Commit: `${{ github.sha }}`
+          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          nofail: true
