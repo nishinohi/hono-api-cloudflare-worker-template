@@ -1,0 +1,60 @@
+# CLAUDE.md
+
+## プロジェクト概要
+
+Cloudflare Workers 上で動作する Hono 製 API のテンプレートです。pnpm workspace のマルチパッケージ構成で、API の実装は `apps/api` に置きます。
+
+## 技術スタック
+
+Hono 4 / Cloudflare Workers / Wrangler 4 / TypeScript / Vitest / ESLint / Prettier / textlint / Lefthook / pnpm workspace
+
+## ディレクトリ構成
+
+| パス                        | 役割                                           |
+| --------------------------- | ---------------------------------------------- |
+| `apps/api/src/index.ts`     | Worker のエントリーポイント                    |
+| `apps/api/src/app.ts`       | `createApp()` によるアプリケーションの組み立て |
+| `apps/api/src/types/env.ts` | Bindings と Variables の型                     |
+| `apps/api/src/lib/`         | ログとレスポンスのヘルパー                     |
+| `apps/api/src/errors/`      | `AppError` とエラーハンドラー                  |
+| `apps/api/src/middleware/`  | 共通ミドルウェア                               |
+| `apps/api/src/routes/`      | ルーティングとハンドラー                       |
+| `packages/eslint-config/`   | 共有 ESLint 設定                               |
+| `packages/math/`            | ワークスペース参照のサンプル                   |
+
+## よく使うコマンド
+
+| コマンド                          | 説明                                     |
+| --------------------------------- | ---------------------------------------- |
+| `pnpm dev`                        | 開発サーバーを起動する                   |
+| `pnpm check`                      | typecheck、lint、test をまとめて実行する |
+| `pnpm test`                       | テストを実行する                         |
+| `pnpm --filter api test:coverage` | カバレッジ付きでテストを実行する         |
+| `pnpm cf-typegen`                 | `wrangler.jsonc` から型を再生成する      |
+| `pnpm build`                      | バンドルを検証する                       |
+
+## 本プロジェクト固有の約束
+
+以下は `.claude/rules/` の記述より優先します。
+
+- 入力検証に zod は使わない。`src/routes/<feature>/validation.ts` の純粋関数で検証し、`ValidationResult<T>` を返す。`coding-style.md` の zod の例は本プロジェクトでは適用しない。
+- `patterns.md` の Custom Hooks パターンは React 向けのため適用しない。
+- E2E テスト（Playwright）は対象外。結合テストは Hono の `app.request()` で代替する。
+- ログ出力は `src/lib/logger.ts` の `log()` を経由する。`console.log` は禁止で、`console.info` / `warn` / `error` のみ許可している。
+- 例外は `AppError` を throw し、レスポンスの整形は `src/errors/error-handler.ts` に集約する。ハンドラー内で個別に `c.json(failure(...))` を組み立てない。
+- API レスポンスは `src/lib/response.ts` の `success()` / `failure()` を使い、形式を統一する。
+- データアクセスは `TaskRepository` のようなインターフェース越しに行い、実装をハンドラーへ直接書かない。
+- `wrangler.jsonc` を変更したら `pnpm cf-typegen` を実行し、`worker-configuration.d.ts` をコミットする。
+- `compatibility_date` はインストール済みの workerd が対応する日付までしか指定できない。進める場合は `wrangler dev` で起動を確認する。
+- `wrangler.jsonc` の `vars` などのバインディングは環境間で継承されない。`env.*` を編集するときは全量を書く。
+
+## ルール
+
+@.claude/rules/coding-style.md
+@.claude/rules/testing.md
+@.claude/rules/patterns.md
+@.claude/rules/security.md
+@.claude/rules/performance.md
+@.claude/rules/git-workflow.md
+@.claude/rules/agents.md
+@.claude/rules/hooks.md
