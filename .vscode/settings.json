@@ -1,0 +1,22 @@
+{
+  "eslint.validate": ["javascript", "typescript"],
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.markdownlint": "explicit",
+    "source.fixAll.textlint": "explicit"
+  },
+  "files.watcherExclude": {
+    "**/.wrangler/**": true
+  },
+  "search.exclude": {
+    "**/.wrangler/**": true,
+    "**/apps/api/worker-configuration.d.ts": true
+  },
+  "files.readonlyInclude": {
+    "**/apps/api/worker-configuration.d.ts": true
+  },
+  "textlint.autoFixOnSave": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
