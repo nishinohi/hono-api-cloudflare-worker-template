@@ -1,0 +1,19 @@
+{
+  "name": "@repo/math",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}
