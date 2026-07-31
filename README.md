@@ -55,7 +55,7 @@ pnpm cf-typegen
 pnpm dev
 ```
 
-`http://localhost:8787` で待ち受けます。
+`http://localhost:8787` で待ち受けます。`wrangler.jsonc` の `env.local` を読み込んで起動するため、`ENVIRONMENT` は `local` になります。
 
 ### 4. 動作確認
 
@@ -108,13 +108,13 @@ curl http://localhost:8787/api/tasks
 
 ### apps/api
 
-| コマンド                             | 説明                              |
-| ------------------------------------ | --------------------------------- |
-| `pnpm --filter api dev`              | Wrangler の開発サーバーを起動する |
-| `pnpm --filter api deploy:staging`   | staging 環境へデプロイする        |
-| `pnpm --filter api deploy:develop`   | develop 環境へデプロイする        |
-| `pnpm --filter api test:watch`       | テストをウォッチモードで実行する  |
-| `pnpm --filter api cf-typegen:check` | 生成済みの型が最新か検証する      |
+| コマンド                             | 説明                                             |
+| ------------------------------------ | ------------------------------------------------ |
+| `pnpm --filter api dev`              | Wrangler の開発サーバーを `local` 環境で起動する |
+| `pnpm --filter api deploy:staging`   | staging 環境へデプロイする                       |
+| `pnpm --filter api deploy:develop`   | develop 環境へデプロイする                       |
+| `pnpm --filter api test:watch`       | テストをウォッチモードで実行する                 |
+| `pnpm --filter api cf-typegen:check` | 生成済みの型が最新か検証する                     |
 
 ## 設計方針
 
@@ -157,7 +157,18 @@ curl http://localhost:8787/api/tasks
 
 秘匿する必要のない設定値は `wrangler.jsonc` の `vars` に書きます。テンプレートでは `ENVIRONMENT`、`CORS_ALLOWED_ORIGINS`、`LOG_LEVEL` を定義しています。
 
-`vars` や `d1_databases` などのバインディングは環境間で継承されません。`env.staging` や `env.develop` を編集するときは、その環境で必要な設定を必ず全量書いてください。
+環境は昇格順に `local`、`develop`、`staging` と、トップレベルの設定に対応する production の 4 つです。`local` は `pnpm dev` 専用で、デプロイ対象には含めていません。
+
+| 環境       | `ENVIRONMENT` | `CORS_ALLOWED_ORIGINS`        | `LOG_LEVEL` |
+| ---------- | ------------- | ----------------------------- | ----------- |
+| local      | `local`       | `*`                           | `debug`     |
+| develop    | `develop`     | `https://develop.example.com` | `debug`     |
+| staging    | `staging`     | `https://staging.example.com` | `info`      |
+| production | `development` | `*`                           | `debug`     |
+
+production の値はテンプレートの初期値です。実際に運用するときは `CORS_ALLOWED_ORIGINS` を具体的なオリジンへ、`LOG_LEVEL` を `info` へ書き換えてください。
+
+`vars` や `d1_databases` などのバインディングは環境間で継承されません。`env.local` や `env.develop` を編集するときは、その環境で必要な設定を必ず全量書いてください。
 
 ### ローカルのシークレット
 
@@ -230,6 +241,8 @@ pnpm exec lefthook install
 | `main`    | production | `hono-api-cloudflare-worker-template`         |
 | `staging` | staging    | `hono-api-cloudflare-worker-template-staging` |
 | `develop` | develop    | `hono-api-cloudflare-worker-template-develop` |
+
+`wrangler.jsonc` にはこのほかに `local` 環境がありますが、`pnpm dev` でのローカル起動専用のためデプロイはしません。
 
 ### GitHub Actions の有効化
 
