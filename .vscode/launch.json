@@ -1,32 +1,61 @@
 {
   "version": "0.2.0",
   "configurations": [
+    // wrangler dev を JavaScript デバッグターミナルで起動する。
+    // VS Code が workerd の inspector へ自動で接続するため、事前準備なしでブレークポイントが効く。
     {
-      "name": "Debug API (wrangler dev)",
+      "name": "API: wrangler dev を起動してデバッグ",
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm dev",
       "cwd": "${workspaceFolder}"
     },
+
+    // 既に起動している wrangler dev へ後からアタッチする。
+    // 別の wrangler dev が 9229 を使っていると別ポートにずれるため、
+    // その場合は `pnpm --filter api dev -- --inspector-port 9229` のように固定する。
+    // cwd と resolveSourceMapLocations は workerd 向けの Cloudflare 公式設定。
     {
-      "name": "Vitest: Debug Current File",
+      "name": "API: 起動中の wrangler dev にアタッチ",
       "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["test", "${relativeFile}"],
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "console": "integratedTerminal",
-      "sourceMaps": true
+      "request": "attach",
+      "port": 9229,
+      "cwd": "/",
+      "resolveSourceMapLocations": null,
+      "attachExistingChildren": false,
+      "autoAttachChildProcesses": false,
+      "sourceMaps": true,
+      "restart": true
     },
+
+    // 開いているテストファイルだけを実行する。${file} は絶対パスなので
+    // vitest の root（apps/api）と関係なくフィルターが一致する。
     {
-      "name": "Vitest: Debug All Tests",
+      "name": "Vitest: 現在のファイル",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["test"],
+      "program": "${workspaceFolder}/apps/api/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--no-file-parallelism", "${file}"],
+      "cwd": "${workspaceFolder}/apps/api",
+      "autoAttachChildProcesses": true,
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "console": "integratedTerminal",
-      "sourceMaps": true
+      "smartStep": true,
+      "sourceMaps": true,
+      "console": "integratedTerminal"
+    },
+
+    {
+      "name": "Vitest: api の全テスト",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/api/node_modules/vitest/vitest.mjs",
+      "args": ["run", "--no-file-parallelism"],
+      "cwd": "${workspaceFolder}/apps/api",
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "smartStep": true,
+      "sourceMaps": true,
+      "console": "integratedTerminal"
     }
   ]
 }
