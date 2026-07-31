@@ -145,7 +145,9 @@ curl http://localhost:8787/api/tasks
 
 ### 入力検証
 
-外部ライブラリを使わず、`src/routes/<feature>/validation.ts` の純粋関数で検証します。戻り値は `ValidationResult<T>` 型で、成功なら `{ ok: true, value }`、失敗なら `{ ok: false, issues }` を返します。zod などへ移行する場合は、このファイルの実装だけを差し替えれば済みます。
+検証は zod のスキーマで行います。スキーマは `src/routes/<feature>/validation.ts` に置き、入力型は `z.infer` で導出するため、型と検証を二重に書く必要はありません。ルート定義では `@hono/zod-validator` の `zValidator(target, schema, rejectInvalid)` を挟み、ハンドラーは `c.req.valid('json')` で検証済みの値を受け取ります。
+
+第 3 引数の `rejectInvalid`（`src/lib/validator.ts`）は必ず渡してください。省略すると zValidator 既定の 400 と zod 独自のボディが返り、`failure()` 形式から外れます。`rejectInvalid` は zod が集めたすべての issue を `details` へ変換し、422 の `AppError` として throw します。
 
 ### ログ出力
 
@@ -264,9 +266,9 @@ pnpm exec lefthook install
 2. `src/routes/index.ts` の `registerRoutes()` に 1 行追加する。
 3. ハンドラーと同じ階層にテストを置く。
 
-### バリデーションを zod に置き換える
+### 検証するパートを増やす
 
-`src/routes/<feature>/validation.ts` の `parseXxxInput` を zod の `safeParse` で実装し直します。戻り値を `ValidationResult<T>` 型に合わせれば、ハンドラー側の変更は不要です。
+`zValidator` の検証ターゲットは `json` / `form` / `query` / `header` / `param` / `cookie` から選びます。複数のパートを検証するときはバリデーターをチェーンし、それぞれ `c.req.valid('json')`、`c.req.valid('query')` のように受け取ります。ヘッダーを検証する場合、Hono はキーを小文字で持つため、スキーマのキーも小文字で書いてください。
 
 ### D1 と Drizzle を追加する
 
