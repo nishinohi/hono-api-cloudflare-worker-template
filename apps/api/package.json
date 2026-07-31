@@ -20,7 +20,9 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {
-    "hono": "^4.10.3"
+    "@hono/zod-validator": "^0.9.0",
+    "hono": "^4.10.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@repo/oxlint-config": "workspace:*",
