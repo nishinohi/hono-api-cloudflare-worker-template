@@ -1,15 +1,9 @@
 ---
 paths:
-  - "apps/api/src/**/*.{ts,tsx}"
+  - 'apps/api/src/**/*.{ts,tsx}'
 ---
 
 # Hono API Implementation Rules
-
-Hono 公式ドキュメントを基本ルールとし、Cloudflare Workers での運用知見と技術記事の実践例を加えたもの。
-`apps/api` の実装はこのルールに従う。
-
-Hono の実装に関する本プロジェクトの決定はこのファイルに集約する。`../coding-style.md` / `../testing.md` と食い違う場合はこのファイルを優先する。
-Hono に依存しない約束（Lint 設定、wrangler の運用など）は CLAUDE.md の「本プロジェクト固有の約束」に置く。
 
 ## ディレクトリ構成
 
@@ -20,28 +14,28 @@ apps/api/src/
 ├── index.ts              # Worker のエントリーポイント。export default のみ
 ├── app.ts                # createApp() でアプリを組み立てる
 ├── types/env.ts          # Bindings / Variables / AppEnv
-├── lib/                  # 横断ヘルパー（logger、response）
+├── lib/                  # 横断ヘルパー（logger、response、validator）
 ├── errors/               # AppError と onError / notFound ハンドラー
 ├── middleware/           # 共通ミドルウェアと registerMiddleware()
 └── routes/
     ├── index.ts              # registerRoutes()。ルート追加時はここに 1 行足す
-    ├── health/               # エンドポイントが 1 つでもディレクトリを作る
-    │   ├── index.ts
-    │   └── handlers.ts
-    └── tasks/
+    ├── [featureName]/        # エンドポイントが 1 つでもディレクトリを作る
+    │   └── index.ts          # ルート定義とハンドラー（小さいうちはインライン）
+    └── [featureName]/
         ├── index.ts          # ルーター定義と依存の組み立て
-        ├── handlers.ts       # ハンドラー本体
-        ├── validation.ts     # 入力検証（純粋関数）
+        ├── handlers.ts       # 肥大化したときに切り出すハンドラー本体
+        ├── validation.ts     # zod スキーマと、そこから導出した入力型
         ├── repository.ts     # データアクセスのインターフェースと実装
-        └── types.ts          # ドメイン型と入力型
+        └── types.ts          # ドメイン型
 ```
 
 判断基準は次のとおり。
 
 - ルートは必ず `routes/<feature>/` ディレクトリとして作る。`routes/<feature>.ts` の単一ファイルは作らない。エンドポイントが 1 つしかない場合も例外を設けない。
 - ディレクトリ名はリソースの複数形（`tasks`、`users`）にする。
-- 各ディレクトリは `index.ts` と `handlers.ts` を必ず持つ。`index.ts` はルーター定義と依存の組み立てだけを担い、`routes/index.ts` の `registerRoutes()` に `app.route()` を 1 行足す。
-- `validation.ts` / `repository.ts` / `types.ts` は必要になった時点で追加する。中身のないファイルを先回りで作らない。
+- 各ディレクトリは `index.ts` を必ず持つ。`index.ts` はルーター定義と依存の組み立てを担い、`routes/index.ts` の `registerRoutes()` に `app.route()` を 1 行足す。
+- ハンドラーはまず `index.ts` のルート定義へインラインで書く。行数が増えてきたら `handlers.ts` へ切り出す。
+- `handlers.ts` / `validation.ts` / `repository.ts` / `types.ts` は必要になった時点で追加する。中身のないファイルを先回りで作らない。
 - 複数の機能から使うものだけを `lib/` へ置く。1 つの機能でしか使わないものは、その機能のディレクトリに置く。
 - テストは対象ファイルと同じディレクトリに `<対象>.test.ts` として置く。
 - 1 ファイルは 200〜400 行を目安とし、800 行を超えない。
@@ -50,6 +44,7 @@ apps/api/src/
 
 - `index.ts` は `createApp()` の結果を `export default` するだけに保つ。ルート定義やミドルウェア登録を書かない。
 - アプリの生成はファクトリー関数にする。テストごとにまっさらな `app` を作れることが型と状態の両面で効く。
+- `AppEnv` を app・ミドルウェア・ハンドラーへ行き渡らせるには `hono/factory` の `createFactory<AppEnv>()` を使い、`factory.createApp()` / `createMiddleware()` / `createHandlers()` から組み立てる。`new Hono<AppEnv>()` を直接使う場合は、ジェネリクスの付け忘れがないか確認する。
 - 登録順は「ミドルウェア → ルート → `onError` → `notFound`」で固定する。
 - `app.route()` のネストは内側から先に登録する。親を先に `route()` すると子のパスが 404 になり、この間違いは気づきにくい。
 
@@ -75,37 +70,43 @@ app.route('/two', two)
 export const createTasksRoute = (repository: TaskRepository): Hono<AppEnv> => {
   const handlers = createTaskHandlers(repository)
 
-  return new Hono<AppEnv>()
-    .get('/', handlers.list)
-    .post('/', handlers.create)
-    .get('/:id', handlers.get)
+  return new Hono<AppEnv>().get('/', handlers.list).post('/', handlers.create).get('/:id', handlers.get)
 }
 ```
 
 ## ハンドラーと型推論
 
-公式ドキュメントは「Ruby on Rails 風のコントローラーを作るな」と明言している。ハンドラーをルート定義から引き剥がすと、パスパラメーターの型推論が効かなくなる。分離する場合は、次のどちらかで型を取り戻す。
+ハンドラーはルート定義へインラインで書くのが基本。パスパラメーターの型がそのまま推論される。規模が大きくなっても Ruby on Rails 風のコントローラーへ寄せず、`app.route()` で機能ごとに分割する。
 
-- ハンドラーの引数に `Context<AppEnv, '/:id'>` のようなパス付きの型を明示する（本プロジェクトの方式）。
-- `hono/factory` の `createFactory().createHandlers()` を使う。ミドルウェアとハンドラーをまとめて定義でき、型推論も保たれる。
+ファイルを分けるとパスパラメーターの型推論が効かなくなるため、分離する場合は次のどちらかで型を取り戻す。
+
+- `hono/factory` の `createFactory<AppEnv>().createHandlers()` を使う（推奨）。ミドルウェアとハンドラーをまとめて定義でき、型推論も保たれる。
+- ハンドラーの引数に `Context<AppEnv, '/:id'>` のようなパス付きの型を明示する（既存の `routes/tasks` の方式）。
 
 そのうえで次を守る。
 
 - 依存はファクトリー関数の引数で注入する。ハンドラーがリポジトリを直接 import しない。
 - ハンドラーは「入力の取り出し → 検証 → リポジトリ呼び出し → レスポンス生成」だけを行う。ビジネスロジックは別関数へ切り出す。
 - 失敗時は `AppError` を throw する。ハンドラー内で `c.json(failure(...))` を組み立てない。
-- `c.req.json()` は不正な JSON で例外を投げる。握りつぶさず `badRequest` へ変換する。
+- ボディは `zValidator` を通し、`c.req.valid('json')` で受け取る。バリデーターを通さず `c.req.json()` を直接読む場合は、不正な JSON で例外が飛ぶため `badRequest` へ変換する。
+- `createHandlers()` はパスを知らないため、`c.req.param('id')` が `string | undefined` になる。パスパラメーターを使うハンドラーは `createFactory<AppEnv, '/:id'>()` のようにパスを型引数で渡す。
 
 ```ts
-type TaskIdContext = Context<AppEnv, '/:id'>
+const idFactory = createFactory<AppEnv, '/:id'>()
 
 export const createTaskHandlers = (repository: TaskRepository) => ({
-  get: async (c: TaskIdContext) => {
+  get: idFactory.createHandlers(async (c) => {
     const task = await repository.find(c.req.param('id'))
     if (!task) throw notFoundError(TASK_NOT_FOUND)
     return c.json(success(task))
-  },
+  }),
 })
+```
+
+`createHandlers()` は配列を返す。ルート定義ではスプレッドして渡す。
+
+```ts
+new Hono<AppEnv>().get('/:id', ...handlers.get)
 ```
 
 ## ミドルウェア
@@ -114,12 +115,15 @@ export const createTaskHandlers = (repository: TaskRepository) => ({
 - 登録順には意味がある。`requestId` → `secureHeaders` → `logger` → `cors` の順を崩さない。後続がログに載せる ID を最初に採番しておく。
 - 共通ミドルウェアは `middleware/registerMiddleware()` に集約し、`app.ts` からは 1 回だけ呼ぶ。
 - 認証など一部のパスだけに効かせるものは、対象ルーター側で `app.use('/api/*', ...)` のように範囲を絞って適用する。全体に効かせると `/health` まで巻き込む。
-- カスタムミドルウェアは `hono/factory` の `createMiddleware` で書く。`c.set()` する値の型はミドルウェアのジェネリクスに書き、`AppEnv` の `Variables` に合流させる。
+- カスタムミドルウェアは `hono/factory` の `createFactory<AppEnv>()` を経由し、`factory.createMiddleware` で書く。`AppEnv` が引き継がれるため、ジェネリクスを毎回書かなくてよい。`c.set()` する値の型は `types/env.ts` の `Variables` に足す。
+- factory を経由せず `createMiddleware` を単体で使う場合だけ、`createMiddleware<{ Variables: { userId: string } }>` のようにジェネリクスを明示し、`AppEnv` の `Variables` に合流させる。
 - `declare module 'hono'` による `ContextVariableMap` の拡張は使わない。ミドルウェアを適用していないハンドラーでも値が存在するかのように推論され、実行時エラーを型が防げなくなる。
 - `next()` は Hono が例外を捕捉して `onError` へ流すため throw しない。ミドルウェアで `try/catch` を書かない。
 
 ```ts
-export const authMiddleware = createMiddleware<{ Variables: { userId: string } }>(async (c, next) => {
+const factory = createFactory<AppEnv>()
+
+export const authMiddleware = factory.createMiddleware(async (c, next) => {
   const userId = await verifyToken(c.req.header('authorization'))
   if (!userId) throw new AppError(401, ErrorCode.BadRequest, '認証が必要です')
   c.set('userId', userId)
@@ -129,12 +133,30 @@ export const authMiddleware = createMiddleware<{ Variables: { userId: string } }
 
 ## 入力検証
 
-- 検証は `src/routes/<feature>/validation.ts` の純粋関数で行い、`ValidationResult<T>` を返す。zod と `@hono/zod-validator` は使わない。公式ドキュメントとほとんどの技術記事は zod 前提だが、本プロジェクトでは依存を増やさない判断を優先する。
-- 検証は境界（ハンドラーの入口）で 1 回だけ行う。通過後は型で保証された値として扱い、下層で再検証しない。
-- 検証関数は「最初の 1 件で打ち切らず、すべての issue を集めて返す」。`ApiErrorDetail` の `path` にはフィールド名を入れる。
-- 検証に失敗したら `validationFailed(issues)` を throw する。ステータスは 422 に統一する。
-- `unknown` を受け取り、型ガードで絞り込む。`as` によるキャストは絞り込み後の確定値にだけ使う。
-- クエリやヘッダーを検証するときは、ヘッダー名を小文字で扱う。Hono の検証ターゲットはヘッダーのキーを小文字で持つ。
+- 検証は zod のスキーマで行う。スキーマは `src/routes/<feature>/validation.ts` に置き、入力型は `z.infer` で導出する。型と検証を二重に書かない。
+- ルートには `@hono/zod-validator` の `zValidator(target, schema, rejectInvalid)` を挟み、検証済みの値を `c.req.valid('json')` で受け取る。ハンドラーでボディを読み直さない。
+- 第 3 引数の `rejectInvalid`（`lib/validator.ts`）は必ず渡す。省略すると zValidator 既定の 400 と zod 独自のボディが返り、`failure()` 形式から外れる。
+- 検証ターゲットは `json` / `form` / `query` / `header` / `param` / `cookie` から選ぶ。複数のパートを検証するときはバリデーターをチェーンする。
+- 検証は境界（ルート定義）で 1 回だけ行う。通過後は型で保証された値として扱い、下層で再検証しない。
+- 最初の 1 件で打ち切らない。zod が集めたすべての issue を `ApiErrorDetail` へ変換し、`path` にはフィールド名（ネストはドット区切り）を入れる。
+- 検証に失敗したら 422 を返す。`rejectInvalid` が `validationFailed(details)` を throw し、整形は `onError` に任せる。
+- 不正な JSON ボディは zValidator が 400 で弾く。ハンドラーで `try`/`catch` を書かない。
+- ヘッダーを検証するときはスキーマのキーを小文字で書く。Hono の検証ターゲットはヘッダーのキーを小文字で持つ。
+
+```ts
+export const createTaskSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  status: z.enum(TASK_STATUSES).default('todo'),
+})
+
+export type CreateTaskInput = z.infer<typeof createTaskSchema>
+
+// ルート側
+create: factory.createHandlers(zValidator('json', createTaskSchema, rejectInvalid), async (c) => {
+  const task = await repository.create(c.req.valid('json'))
+  return c.json(success(task), 201)
+})
+```
 
 ## エラーハンドリング
 
@@ -179,7 +201,7 @@ export const authMiddleware = createMiddleware<{ Variables: { userId: string } }
 - テストごとに `createApp()` で新しいアプリを作る。モジュールレベルのシングルトンを共有しない。
 - JSON ボディを送るテストでは `Content-Type: application/json` を必ず付ける。付け忘れるとボディが空として扱われ、検証が通らない理由に気づきにくい。
 - バインディングは `app.request(path, init, MOCK_ENV)` の第 3 引数でモックする。
-- 検証関数とリポジトリは純粋なユニットテストで網羅し、`app.request()` は経路とステータスの確認に使う。
+- スキーマとリポジトリは `safeParse()` などを使った純粋なユニットテストで網羅し、`app.request()` は経路とステータスの確認に使う。
 - カバレッジは 80% 以上を維持する。
 
 ```ts
@@ -223,14 +245,13 @@ expect(res.status).toBe(201)
 
 実装を終える前に次を確認する。
 
-- [ ] ルートを `routes/<feature>/` ディレクトリとして作り、`index.ts` と `handlers.ts` を置いた。
+- [ ] ルートを `routes/<feature>/` ディレクトリとして作り、`index.ts` を置いた。ハンドラーはインラインで書くか、切り出した場合は型推論を保っている。
 - [ ] ルーターはメソッドチェーンで定義し、`registerRoutes()` に登録した。
 - [ ] 具体的なパスをワイルドカードより先に登録した。
 - [ ] ハンドラーは依存を引数で受け取り、リポジトリ越しにデータへアクセスしている。
-- [ ] 入力検証を境界で行い、`ValidationResult<T>` を返している。
+- [ ] 入力検証を zod スキーマと `zValidator(..., rejectInvalid)` で行い、値を `c.req.valid()` から受け取っている。
 - [ ] エラーは `AppError` を throw し、レスポンス整形を `onError` に任せている。
 - [ ] レスポンスを `success()` / `failure()` で組み立てている。
 - [ ] `c.env` 経由で環境変数を読み、トップレベルで参照していない。
 - [ ] `console.log` を使わず `log()` を経由している。
 - [ ] `app.request()` の結合テストとユニットテストを書き、カバレッジ 80% を満たしている。
-

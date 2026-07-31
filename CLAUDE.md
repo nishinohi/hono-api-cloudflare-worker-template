@@ -6,7 +6,7 @@ Cloudflare Workers 上で動作する Hono 製 API のテンプレートです�
 
 ## 技術スタック
 
-Hono 4 / Cloudflare Workers / Wrangler 4 / TypeScript / Vitest / Oxlint / Prettier / textlint / Lefthook / pnpm workspace
+Hono 4 / Cloudflare Workers / Wrangler 4 / TypeScript / zod / Vitest / Oxlint / Prettier / textlint / Lefthook / pnpm workspace
 
 ## ディレクトリ構成
 
@@ -15,7 +15,7 @@ Hono 4 / Cloudflare Workers / Wrangler 4 / TypeScript / Vitest / Oxlint / Pretti
 | `apps/api/src/index.ts`     | Worker のエントリーポイント                    |
 | `apps/api/src/app.ts`       | `createApp()` によるアプリケーションの組み立て |
 | `apps/api/src/types/env.ts` | Bindings と Variables の型                     |
-| `apps/api/src/lib/`         | ログとレスポンスのヘルパー                     |
+| `apps/api/src/lib/`         | ログ、レスポンス、入力検証のヘルパー           |
 | `apps/api/src/errors/`      | `AppError` とエラーハンドラー                  |
 | `apps/api/src/middleware/`  | 共通ミドルウェア                               |
 | `apps/api/src/routes/`      | ルーティングとハンドラー                       |

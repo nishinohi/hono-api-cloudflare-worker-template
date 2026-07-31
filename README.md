@@ -19,6 +19,7 @@ Cloudflare Workers 上で動作する Hono 製 API のテンプレートです�
 | フレームワーク | Hono 4                     |
 | 開発・デプロイ | Wrangler 4                 |
 | 言語           | TypeScript                 |
+| 入力検証       | zod、@hono/zod-validator   |
 | テスト         | Vitest                     |
 | Lint / Format  | Oxlint、Prettier、textlint |
 | Git フック     | Lefthook                   |
