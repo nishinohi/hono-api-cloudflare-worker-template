@@ -26,12 +26,12 @@
   // 重要: vars / kv_namespaces / d1_databases などの設定は env 間で継承されない。
   // env を追加したら、その env で必要な設定を必ず全量書く。
   "env": {
-    "staging": {
-      "name": "hono-api-cloudflare-worker-template-staging",
+    "local": {
+      "name": "hono-api-cloudflare-worker-template-local",
       "vars": {
-        "ENVIRONMENT": "staging",
-        "CORS_ALLOWED_ORIGINS": "https://staging.example.com",
-        "LOG_LEVEL": "info",
+        "ENVIRONMENT": "local",
+        "CORS_ALLOWED_ORIGINS": "*",
+        "LOG_LEVEL": "debug",
       },
       "observability": {
         "enabled": true,
@@ -42,8 +42,20 @@
       "name": "hono-api-cloudflare-worker-template-develop",
       "vars": {
         "ENVIRONMENT": "develop",
-        "CORS_ALLOWED_ORIGINS": "*",
+        "CORS_ALLOWED_ORIGINS": "https://develop.example.com",
         "LOG_LEVEL": "debug",
+      },
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+      },
+    },
+    "staging": {
+      "name": "hono-api-cloudflare-worker-template-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "CORS_ALLOWED_ORIGINS": "https://staging.example.com",
+        "LOG_LEVEL": "info",
       },
       "observability": {
         "enabled": true,
