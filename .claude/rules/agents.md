@@ -1,49 +1,23 @@
-# Agent Orchestration
+# Agents
 
-## Available Agents
+サブエージェントの定義は `.claude/agents/` に置いている。
 
-Located in `~/.claude/agents/`:
+## 一覧
 
-| Agent | Purpose | When to Use |
-|-------|---------|-------------|
-| planner | Implementation planning | Complex features, refactoring |
-| architect | System design | Architectural decisions |
-| tdd-guide | Test-driven development | New features, bug fixes |
-| code-reviewer | Code review | After writing code |
-| security-reviewer | Security analysis | Before commits |
-| build-error-resolver | Fix build errors | When build fails |
-| e2e-runner | E2E testing | Critical user flows |
-| refactor-cleaner | Dead code cleanup | Code maintenance |
-| doc-updater | Documentation | Updating docs |
+| エージェント         | 役割                     | 使いどころ                             |
+| -------------------- | ------------------------ | -------------------------------------- |
+| planner              | 実装計画の作成           | 複数ファイルにまたがる機能追加、リファクタリング |
+| architect            | 設計判断                 | 構成の変更、依存の切り方を決めるとき   |
+| tdd-guide            | テスト先行の進行         | 新機能、バグ修正                       |
+| code-reviewer        | コードレビュー           | 実装を書いた直後                       |
+| security-reviewer    | セキュリティ確認         | 入力、認証、シークレットに触れたとき   |
+| build-error-resolver | ビルドと型エラーの解消   | `pnpm typecheck` や `pnpm build` が落ちたとき |
+| refactor-cleaner     | 不要コードの削除         | 実装が落ち着いた後の掃除               |
+| doc-updater          | ドキュメント更新         | README や CLAUDE.md の追随             |
 
-## Immediate Agent Usage
+## 使い方
 
-No user prompt needed:
-1. Complex feature requests - Use **planner** agent
-2. Code just written/modified - Use **code-reviewer** agent
-3. Bug fix or new feature - Use **tdd-guide** agent
-4. Architectural decision - Use **architect** agent
-
-## Parallel Task Execution
-
-ALWAYS use parallel Task execution for independent operations:
-
-```markdown
-# GOOD: Parallel execution
-Launch 3 agents in parallel:
-1. Agent 1: Security analysis of auth.ts
-2. Agent 2: Performance review of cache system
-3. Agent 3: Type checking of utils.ts
-
-# BAD: Sequential when unnecessary
-First agent 1, then agent 2, then agent 3
-```
-
-## Multi-Perspective Analysis
-
-For complex problems, use split role sub-agents:
-- Factual reviewer
-- Senior engineer
-- Security expert
-- Consistency reviewer
-- Redundancy checker
+- 独立した調査は同時に投げる。順番に依存がある場合だけ直列にする。
+- 調べた結果を持ち帰らせる。エージェントの出力はそのままユーザーへ見せず、要点をまとめて伝える。
+- 1 ファイルの単純な編集や、既にどこを直すか分かっている作業には使わない。自分で直す方が速い。
+- Playwright を使う E2E は本プロジェクトの対象外のため、E2E 専用のエージェントは置いていない。
