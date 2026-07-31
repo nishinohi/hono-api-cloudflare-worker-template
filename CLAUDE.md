@@ -37,13 +37,6 @@ Hono 4 / Cloudflare Workers / Wrangler 4 / TypeScript / Vitest / Oxlint / Pretti
 
 以下は `.claude/rules/` の記述より優先します。
 
-- 入力検証に zod は使わない。`src/routes/<feature>/validation.ts` の純粋関数で検証し、`ValidationResult<T>` を返す。`coding-style.md` の zod の例は本プロジェクトでは適用しない。
-- `patterns.md` の Custom Hooks パターンは React 向けのため適用しない。
-- E2E テスト（Playwright）は対象外。結合テストは Hono の `app.request()` で代替する。
-- ログ出力は `src/lib/logger.ts` の `log()` を経由する。`console.log` は禁止で、`console.info` / `warn` / `error` のみ許可している。
-- 例外は `AppError` を throw し、レスポンスの整形は `src/errors/error-handler.ts` に集約する。ハンドラー内で個別に `c.json(failure(...))` を組み立てない。
-- API レスポンスは `src/lib/response.ts` の `success()` / `failure()` を使い、形式を統一する。
-- データアクセスは `TaskRepository` のようなインターフェース越しに行い、実装をハンドラーへ直接書かない。
 - Lint ルールの共通変更は `packages/oxlint-config/base.json` に入れる。パッケージ固有の設定はそのパッケージの `.oxlintrc.json` に書き、必ず `extends` でベースを読み込む。oxlint は設定をマージせず最も近いものだけを適用するため、`extends` を省くとベースが失われる。
 - oxlint の実行に `-c` / `--config` は付けない。nested config の探索が無効になり、パッケージごとの `.oxlintrc.json` が読まれなくなる。
 - `wrangler.jsonc` を変更したら `pnpm cf-typegen` を実行し、`worker-configuration.d.ts` をコミットする。
