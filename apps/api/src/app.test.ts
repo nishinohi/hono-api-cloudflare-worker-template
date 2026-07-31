@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp } from './app'
 
 const testEnv: Env = {
-  ENVIRONMENT: 'development',
+  ENVIRONMENT: 'local',
   CORS_ALLOWED_ORIGINS: '*',
   LOG_LEVEL: 'debug',
 }

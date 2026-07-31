@@ -18,9 +18,9 @@
 
   // トップレベルの設定が production 環境に対応する（wrangler deploy --env="" で実行）。
   "vars": {
-    "ENVIRONMENT": "development",
-    "CORS_ALLOWED_ORIGINS": "*",
-    "LOG_LEVEL": "debug",
+    "ENVIRONMENT": "production",
+    "CORS_ALLOWED_ORIGINS": "https://example.com",
+    "LOG_LEVEL": "info",
   },
 
   // 重要: vars / kv_namespaces / d1_databases などの設定は env 間で継承されない。

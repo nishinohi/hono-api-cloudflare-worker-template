@@ -5,7 +5,7 @@ import type { AppEnv } from '../types/env'
 import { healthRoute } from './health'
 
 const testEnv: Env = {
-  ENVIRONMENT: 'development',
+  ENVIRONMENT: 'local',
   CORS_ALLOWED_ORIGINS: '*',
   LOG_LEVEL: 'debug',
 }
@@ -24,7 +24,7 @@ describe('GET /health', () => {
     expect(res.status).toBe(200)
     await expect(res.json()).resolves.toMatchObject({
       success: true,
-      data: { status: 'ok', environment: 'development' },
+      data: { status: 'ok', environment: 'local' },
     })
   })
 

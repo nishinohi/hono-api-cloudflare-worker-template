@@ -166,9 +166,9 @@ curl http://localhost:8787/api/tasks
 | local      | `local`       | `*`                           | `debug`     |
 | develop    | `develop`     | `https://develop.example.com` | `debug`     |
 | staging    | `staging`     | `https://staging.example.com` | `info`      |
-| production | `development` | `*`                           | `debug`     |
+| production | `production`  | `https://example.com`         | `info`      |
 
-production の値はテンプレートの初期値です。実際に運用するときは `CORS_ALLOWED_ORIGINS` を具体的なオリジンへ、`LOG_LEVEL` を `info` へ書き換えてください。
+production の `CORS_ALLOWED_ORIGINS` はプレースホルダーです。実際に運用するときは自分のオリジンへ書き換えてください。`*` を本番で使ってはいけません。
 
 `vars` や `d1_databases` などのバインディングは環境間で継承されません。`env.local` や `env.develop` を編集するときは、その環境で必要な設定を必ず全量書いてください。
 
