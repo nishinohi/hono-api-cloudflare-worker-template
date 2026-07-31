@@ -1,5 +1,5 @@
 {
-  "name": "cloudflare-hono-api-template",
+  "name": "hono-api-cloudflare-worker-template",
   "private": true,
   "type": "module",
   "scripts": {

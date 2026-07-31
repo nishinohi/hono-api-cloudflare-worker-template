@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "cloudflare-hono-api-template",
+  "name": "hono-api-cloudflare-worker-template",
   "main": "src/index.ts",
   // インストール済みの workerd が対応する日付までしか指定できない。
   // 日付を進めるときは wrangler を更新してから wrangler dev で確認する。
@@ -27,7 +27,7 @@
   // env を追加したら、その env で必要な設定を必ず全量書く。
   "env": {
     "staging": {
-      "name": "cloudflare-hono-api-template-staging",
+      "name": "hono-api-cloudflare-worker-template-staging",
       "vars": {
         "ENVIRONMENT": "staging",
         "CORS_ALLOWED_ORIGINS": "https://staging.example.com",
@@ -39,7 +39,7 @@
       },
     },
     "develop": {
-      "name": "cloudflare-hono-api-template-develop",
+      "name": "hono-api-cloudflare-worker-template-develop",
       "vars": {
         "ENVIRONMENT": "develop",
         "CORS_ALLOWED_ORIGINS": "*",

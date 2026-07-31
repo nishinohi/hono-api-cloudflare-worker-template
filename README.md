@@ -225,11 +225,11 @@ pnpm exec lefthook install
 
 ### 環境
 
-| ブランチ  | 環境       | Worker 名                              |
-| --------- | ---------- | -------------------------------------- |
-| `main`    | production | `cloudflare-hono-api-template`         |
-| `staging` | staging    | `cloudflare-hono-api-template-staging` |
-| `develop` | develop    | `cloudflare-hono-api-template-develop` |
+| ブランチ  | 環境       | Worker 名                                     |
+| --------- | ---------- | --------------------------------------------- |
+| `main`    | production | `hono-api-cloudflare-worker-template`         |
+| `staging` | staging    | `hono-api-cloudflare-worker-template-staging` |
+| `develop` | develop    | `hono-api-cloudflare-worker-template-develop` |
 
 ### GitHub Actions の有効化
 
