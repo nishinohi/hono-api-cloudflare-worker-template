@@ -9,10 +9,3 @@ export type Task = {
   readonly createdAt: string
   readonly updatedAt: string
 }
-
-export type CreateTaskInput = {
-  readonly title: string
-  readonly status: TaskStatus
-}
-
-export type UpdateTaskInput = Partial<CreateTaskInput>

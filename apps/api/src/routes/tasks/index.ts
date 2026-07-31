@@ -13,11 +13,11 @@ export const createTasksRoute = (repository: TaskRepository): Hono<AppEnv> => {
   const handlers = createTaskHandlers(repository)
 
   return new Hono<AppEnv>()
-    .get('/', handlers.list)
-    .post('/', handlers.create)
-    .get('/:id', handlers.get)
-    .patch('/:id', handlers.update)
-    .delete('/:id', handlers.remove)
+    .get('/', ...handlers.list)
+    .post('/', ...handlers.create)
+    .get('/:id', ...handlers.get)
+    .patch('/:id', ...handlers.update)
+    .delete('/:id', ...handlers.remove)
 }
 
 export const tasksRoute = createTasksRoute(createInMemoryTaskRepository())

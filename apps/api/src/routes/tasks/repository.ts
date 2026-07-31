@@ -1,4 +1,5 @@
-import type { CreateTaskInput, Task, UpdateTaskInput } from './types'
+import type { Task } from './types'
+import type { CreateTaskInput, UpdateTaskInput } from './validation'
 
 /**
  * タスクの永続化インターフェース。
