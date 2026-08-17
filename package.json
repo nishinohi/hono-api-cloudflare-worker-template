@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "lefthook": "^2.1.3",
-    "oxlint": "^1.77.0",
+    "oxlint": "^1.78.0",
     "prettier": "^3.8.3",
     "textlint": "^15.5.2",
     "textlint-rule-preset-ja-spacing": "^2.4.3",
