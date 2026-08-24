@@ -27,7 +27,7 @@
   "devDependencies": {
     "@repo/oxlint-config": "workspace:*",
     "@vitest/coverage-v8": "^4.1.6",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.79.0",
     "vitest": "^4.1.6",
     "wrangler": "^4.125.0"
   }
