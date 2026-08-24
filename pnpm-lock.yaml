@@ -37,10 +37,10 @@ importers:
     dependencies:
       '@hono/zod-validator':
         specifier: ^0.9.0
-        version: 0.9.0(hono@4.13.2)(zod@4.4.3)
+        version: 0.9.0(hono@4.13.3)(zod@4.4.3)
       hono:
-        specifier: ^4.13.2
-        version: 4.13.2
+        specifier: ^4.13.3
+        version: 4.13.3
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -1587,8 +1587,8 @@ packages:
   hastscript@5.1.2:
     resolution: {integrity: sha512-WlztFuK+Lrvi3EggsqOkQ52rKbxkXL3RwB6t5lwoa8QLMemoWfBuL43eDrwOamJyR7uKQKdmKYaBH1NZBiIRrQ==}
 
-  hono@4.13.2:
-    resolution: {integrity: sha512-JydRilDRkYBQMt9qR9U92mXxmbGqsqSn/IKOrh4e7/gEbn+0zSr8igTu0obwJoNGN4sez28DIql7FBHWydoJpA==}
+  hono@4.13.3:
+    resolution: {integrity: sha512-r8AO2mYHoLxSHkgafNeC/BXyb2vWRxD3jem4Ts+ptav8oTG5FIRifAjuJEmZI4bSvvc2ns0GxmIYiZnHqN3mMw==}
     engines: {node: '>=16.9.0'}
 
   hookified@1.15.1:
@@ -3098,13 +3098,13 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@hono/node-server@2.0.12(hono@4.13.2)':
+  '@hono/node-server@2.0.12(hono@4.13.3)':
     dependencies:
-      hono: 4.13.2
+      hono: 4.13.3
 
-  '@hono/zod-validator@0.9.0(hono@4.13.2)(zod@4.4.3)':
+  '@hono/zod-validator@0.9.0(hono@4.13.3)(zod@4.4.3)':
     dependencies:
-      hono: 4.13.2
+      hono: 4.13.3
       zod: 4.4.3
 
   '@img/colour@1.1.0': {}
@@ -3262,7 +3262,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.30.0(supports-color@10.2.2)(zod@3.25.76)':
     dependencies:
-      '@hono/node-server': 2.0.12(hono@4.13.2)
+      '@hono/node-server': 2.0.12(hono@4.13.3)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -3272,7 +3272,7 @@ snapshots:
       eventsource-parser: 3.1.0
       express: 5.2.1(supports-color@10.2.2)
       express-rate-limit: 8.6.1(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
-      hono: 4.13.2
+      hono: 4.13.3
       jose: 6.2.4
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -4377,7 +4377,7 @@ snapshots:
       property-information: 5.6.0
       space-separated-tokens: 1.1.5
 
-  hono@4.13.2: {}
+  hono@4.13.3: {}
 
   hookified@1.15.1: {}
 
