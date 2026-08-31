@@ -29,6 +29,6 @@
     "@vitest/coverage-v8": "^4.1.6",
     "oxlint": "^1.79.0",
     "vitest": "^4.1.6",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.127.0"
   }
 }
